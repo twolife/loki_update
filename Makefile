@@ -22,7 +22,7 @@ CFLAGS += -DMD5SUM=\"$(MD5SUM)\"
 endif
 CFLAGS += -I$(SETUPDB) -DVERSION=\"$(VERSION)\" -DDYNAMIC_UI
 CFLAGS += -DUI_LIBDIR=\"$(UI_LIBDIR)\" -DDATADIR=\"$(DATADIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
-CFLAGS += $(shell gtk-config --cflags) $(shell libglade-config --cflags)
+CFLAGS += $(shell pkgconf gtk+ --cflags) $(shell pkgconf libglade --cflags)
 CFLAGS += $(shell xml2-config --cflags)
 LFLAGS = -rdynamic
 LFLAGS += -Wl,-Bstatic
@@ -35,14 +35,14 @@ LFLAGS += $(shell pkgconf libcurl --libs) -lm -ldl
 TTY_LFLAGS =
 
 GTK_ST_LFLAGS = -Wl,-Bstatic
-GTK_ST_LFLAGS += $(shell libglade-config --libs)
-GTK_ST_LFLAGS += $(shell gtk-config --libs)
+GTK_ST_LFLAGS += $(shell pkgconf libglade --libs)
+GTK_ST_LFLAGS += $(shell pkgconf gtk+ --libs)
 GTK_ST_LFLAGS += -Wl,-Bdynamic
 
 GTK_SH_LFLAGS = -Wl,-Bstatic
-GTK_SH_LFLAGS += $(shell libglade-config --libs)
+GTK_SH_LFLAGS += $(shell pkgconf libglade --libs)
 GTK_SH_LFLAGS += -Wl,-Bdynamic
-GTK_SH_LFLAGS += $(shell gtk-config --libs)
+GTK_SH_LFLAGS += $(shell pkgconf gtk+ --libs)
 
 CORE_OBJS = loki_update.o prefpath.o url_paths.o meta_url.o \
             load_products.o load_patchset.o patchset.o urlset.o \
