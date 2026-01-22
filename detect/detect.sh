@@ -24,7 +24,7 @@ product=$1
 # If there's a special script, use that
 if [ -f "$product.sh" ]; then
     status=2
-    . "$product.sh"
+    . ./"$product.sh"
     exit $status
 fi
 
