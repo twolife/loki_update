@@ -27,10 +27,10 @@ CFLAGS += $(shell xml2-config --cflags)
 LFLAGS = -rdynamic
 LFLAGS += -Wl,-Bstatic
 LFLAGS += -L$(SETUPDB)/$(arch) -lsetupdb
-LFLAGS += $(shell xml2-config --libs)
-LFLAGS += -lz
 LFLAGS += -Wl,-Bdynamic
+LFLAGS += $(shell xml2-config --libs)
 LFLAGS += $(shell pkgconf libcurl --libs) -lm -ldl
+LFLAGS += -lz
 
 TTY_LFLAGS =
 
