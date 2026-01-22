@@ -23,12 +23,12 @@ endif
 CFLAGS += -I$(SETUPDB) -DVERSION=\"$(VERSION)\" -DDYNAMIC_UI
 CFLAGS += -DUI_LIBDIR=\"$(UI_LIBDIR)\" -DDATADIR=\"$(DATADIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 CFLAGS += $(shell gtk-config --cflags) $(shell libglade-config --cflags)
-CFLAGS += $(shell xml-config --cflags)
+CFLAGS += $(shell xml2-config --cflags)
 LFLAGS = -rdynamic
 LFLAGS += -Wl,-Bstatic
 LFLAGS += -L$(SETUPDB)/$(arch) -lsetupdb
-LFLAGS += $(shell xml-config --libs)
-LFLAGS += -lxml -lz
+LFLAGS += $(shell xml2-config --libs)
+LFLAGS += -lz
 LFLAGS += -Wl,-Bdynamic
 LFLAGS += $(shell pkgconf libcurl --libs) -lm -ldl
 
