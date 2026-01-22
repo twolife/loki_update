@@ -34,11 +34,6 @@ LFLAGS += $(shell pkgconf libcurl --libs) -lm -ldl
 
 TTY_LFLAGS =
 
-GTK_ST_LFLAGS = -Wl,-Bstatic
-GTK_ST_LFLAGS += $(shell pkgconf libglade --libs)
-GTK_ST_LFLAGS += $(shell pkgconf gtk+ --libs)
-GTK_ST_LFLAGS += -Wl,-Bdynamic
-
 GTK_SH_LFLAGS = -Wl,-Bstatic
 GTK_SH_LFLAGS += $(shell pkgconf libglade --libs)
 GTK_SH_LFLAGS += -Wl,-Bdynamic
@@ -53,13 +48,10 @@ OBJS = $(CORE_OBJS)
 
 CORE_SRCS = $(CORE_OBJS:.o=.c)
 
-all: $(TARGET) tty_ui.so gtk_st_ui.so gtk_sh_ui.so
+all: $(TARGET) tty_ui.so gtk_sh_ui.so
 
 gtk_sh_ui.so: gtk_ui.o
 	$(CC) -o $@ -shared $^ $(GTK_SH_LFLAGS)
-
-gtk_st_ui.so: gtk_ui.o
-	$(CC) -o $@ -shared $^ $(GTK_ST_LFLAGS)
 
 tty_ui.so: tty_ui.o
 	$(CC) -o $@ -shared $^ $(TTY_LFLAGS)
