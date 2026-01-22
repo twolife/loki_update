@@ -28,9 +28,6 @@ CFLAGS += $(shell gtk-config --cflags) $(shell libglade-config --cflags)
 CFLAGS += $(shell xml-config --cflags)
 LFLAGS = -rdynamic
 LFLAGS += -Wl,-Bstatic
-# Used for non-blocking gethostbyname
-# You can find Ares at: ftp://athena-dist.mit.edu/pub/ATHENA/ares
-LFLAGS += -L./libs/ares-1.1.0 -lares
 LFLAGS += -L$(SETUPDB)/$(arch) -lsetupdb
 LFLAGS += $(shell xml-config --libs)
 LFLAGS += -lxml -lz
