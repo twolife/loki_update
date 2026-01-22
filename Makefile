@@ -12,7 +12,6 @@ arch := $(shell sh print_arch)
 libc := $(shell sh print_libc)
 
 SETUPDB = ../loki_setupdb
-SNARF = snarf-7.0
 OPTFLAGS = -g -O2 -Wall
 CFLAGS = $(OPTFLAGS)
 ifeq ($(arch),alpha)
@@ -21,8 +20,7 @@ endif
 ifdef MD5SUM
 CFLAGS += -DMD5SUM=\"$(MD5SUM)\"
 endif
-CFLAGS += -I$(SETUPDB) -I$(SNARF) -DVERSION=\"$(VERSION)\" -DDYNAMIC_UI
-CFLAGS += -DPROTOTYPES # for snarf
+CFLAGS += -I$(SETUPDB) -DVERSION=\"$(VERSION)\" -DDYNAMIC_UI
 CFLAGS += -DUI_LIBDIR=\"$(UI_LIBDIR)\" -DDATADIR=\"$(DATADIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
 CFLAGS += $(shell gtk-config --cflags) $(shell libglade-config --cflags)
 CFLAGS += $(shell xml-config --cflags)
@@ -32,7 +30,7 @@ LFLAGS += -L$(SETUPDB)/$(arch) -lsetupdb
 LFLAGS += $(shell xml-config --libs)
 LFLAGS += -lxml -lz
 LFLAGS += -Wl,-Bdynamic
-LFLAGS += -lm -ldl
+LFLAGS += $(shell pkgconf libcurl --libs) -lm -ldl
 
 TTY_LFLAGS =
 
@@ -51,10 +49,7 @@ CORE_OBJS = loki_update.o prefpath.o url_paths.o meta_url.o \
             update.o gpg_verify.o get_url.o \
             mkdirhier.o text_parse.o log_output.o safe_malloc.o
 
-SNARF_OBJS = $(SNARF)/url.o $(SNARF)/util.o $(SNARF)/llist.o \
-             $(SNARF)/file.o $(SNARF)/ftp.o $(SNARF)/gopher.o $(SNARF)/http.o
-
-OBJS = $(CORE_OBJS) $(SNARF_OBJS)
+OBJS = $(CORE_OBJS)
 
 CORE_SRCS = $(CORE_OBJS:.o=.c)
 
@@ -69,19 +64,14 @@ gtk_st_ui.so: gtk_ui.o
 tty_ui.so: tty_ui.o
 	$(CC) -o $@ -shared $^ $(TTY_LFLAGS)
 
-$(TARGET): $(SNARF)/snarf $(OBJS)
+$(TARGET): $(OBJS)
 	$(CC) -o $@ $(OBJS) $(LFLAGS)
-
-$(SNARF)/snarf:
-	(cd $(SNARF); test -f Makefile || ./configure; make)
 
 distclean: clean
 	rm -f $(TARGET) *.so
-	-$(MAKE) -C $(SNARF) $@
 
 clean:
 	rm -f *.o *.bak core
-	-$(MAKE) -C $(SNARF) $@
 
 dist:
 	@dist=$(TARGET)-$(VERSION); \

@@ -31,22 +31,13 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/time.h>
 
 /* We'll use snarf, since it's simpler and we have more control over the code */
 /*#define USE_WGET*/
-#define USE_SNARF
-
-#ifdef USE_SNARF
-#ifdef VERSION
-#undef VERSION
-#endif
-#include "config.h"
-#include "url.h"
-#include "options.h"
-#include "util.h"
-#endif
+#define USE_CURL
 
 #include "prefpath.h"
 #include "log_output.h"
@@ -200,17 +191,44 @@ static int wget_url(const char *url, char *file, int maxpath,
 }
 #endif /* USE_WGET */
 
-#ifdef USE_SNARF
-int default_opts = 0; /* For the snarf code */
+#ifdef USE_CURL
+#include <curl/curl.h>
 
-static int snarf_url(const char *url, char *file, int maxpath,
+FILE *_curl_fp;
+size_t _curl_current_dl;
+size_t _curl_total_dl;
+update_callback _curl_update;
+
+static size_t _curl_write_data(void *buffer, size_t size, size_t nmemb, void *udata) {
+    int cancelled;
+    float pc;
+
+    _curl_current_dl += nmemb;
+    pc = (float )_curl_current_dl / _curl_total_dl * 100.0;
+    cancelled = _curl_update(0, NULL, pc, _curl_current_dl, _curl_total_dl, 0.0f, udata);
+
+    if (cancelled)
+        return -1;
+
+    return fwrite(buffer, size, nmemb, _curl_fp);
+}
+
+static size_t _curl_throw_away(void *ptr, size_t nmemb, size_t size, void *data)
+{
+    return (size_t)(size * nmemb);
+}
+
+static int _curl_url(const char *url, char *file, int maxpath,
                      update_callback update, void *udata)
 {
     const char *base;
     char path[PATH_MAX];
     char text[PATH_MAX];
-    UrlResource *rsrc;
     int status;
+
+    _curl_update = update;
+    _curl_current_dl = 0;
+    _curl_total_dl = 0;
 
     /* Get the path where files are stored */
     preferences_path(tmppath, path, sizeof(path));
@@ -239,53 +257,49 @@ static int snarf_url(const char *url, char *file, int maxpath,
     sprintf(text, "URL: %s", url);
     update_message(LOG_VERBOSE, text, update, udata);
 
-    rsrc = url_resource_new();
-    if ( ! rsrc ) {
-        log(LOG_ERROR, _("Out of memory\n"));
-        return(-1);
-    }
-    rsrc->url = url_new();
-    if ( ! rsrc->url ) {
-        log(LOG_ERROR, _("Out of memory\n"));
-        url_resource_destroy(rsrc);
-        return(-1);
-    }
-    if ( ! url_init(rsrc->url, url) ) {
-        update_message(LOG_ERROR, _("Malformed URL, aborting"), update, udata);
-        url_resource_destroy(rsrc);
-        return(-1);
-    }
-    rsrc->outfile = strdup(path);
-    rsrc->outfile_offset = get_file_size(rsrc->outfile);
-    if ( rsrc->outfile_offset ) {
-        rsrc->options |= OPT_RESUME;
-    }
-    if ( get_logging() == LOG_DEBUG ) {
-        rsrc->options |= OPT_VERBOSE;
-    }
-    rsrc->progress = update;
-    rsrc->progress_udata = udata;
-    if ( transfer(rsrc) ) {
-        status = 0;
-        if ( update ) {
-            update(0, NULL, 100.0, 0, 0, 0.0f, udata);
+    CURL *curl;
+    CURLcode res;
+
+    status = -1;
+    curl = curl_easy_init();
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_ALL);
+
+        // Get headers & total size
+        curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, _curl_throw_away);
+        curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+        res = curl_easy_perform(curl);
+
+        if(CURLE_OK == res) {
+            curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &_curl_total_dl);
+
+            // Get the file
+            _curl_fp = fopen(path,"wb");
+            curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
+            curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _curl_write_data);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, udata);
+            res = curl_easy_perform(curl);
+            fclose(_curl_fp);
+            strcpy(file, path);
+            status = 0;
         }
-    } else {
-        status = -1;
+        curl_easy_cleanup(curl);
+        update(0, NULL, 100.0, 0, 0, 0.0f, udata);
     }
-    strcpy(file, path);
-    url_resource_destroy(rsrc);
-    return(status);
+    return status;
 }
-#endif /* USE_SNARF */
+#endif /* USE_CURL */
 
 int get_url(const char *url, char *file, int maxpath,
                      update_callback update, void *udata)
 {
 #if defined(USE_WGET)
     return wget_url(url, file, maxpath, update, udata);
-#elif defined(USE_SNARF)
-    return snarf_url(url, file, maxpath, update, udata);
+#elif defined(USE_CURL)
+    return _curl_url(url, file, maxpath, update, udata);
 #else
 #error No URL transport mechanism
 #endif
