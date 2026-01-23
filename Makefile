@@ -12,8 +12,7 @@ arch := $(shell sh print_arch)
 libc := $(shell sh print_libc)
 
 SETUPDB = ../loki_setupdb
-OPTFLAGS = -g -O2 -Wall
-CFLAGS = $(OPTFLAGS)
+CFLAGS ?= -g -O2 -Wall
 ifeq ($(arch),alpha)
 CFLAGS += -mcpu=ev4 -Wa,-mall
 endif
@@ -31,13 +30,15 @@ LFLAGS += -Wl,-Bdynamic
 LFLAGS += $(shell xml2-config --libs)
 LFLAGS += $(shell pkgconf libcurl --libs) -lm -ldl
 LFLAGS += -lz
+LFLAGS += $(LDFLAGS)
 
-TTY_LFLAGS =
+TTY_LFLAGS = $(LDFLAGS)
 
 GTK_SH_LFLAGS = -Wl,-Bstatic
 GTK_SH_LFLAGS += -lglade
 GTK_SH_LFLAGS += -Wl,-Bdynamic
 GTK_SH_LFLAGS += $(shell pkgconf gtk+ --libs)
+GTK_SH_LFLAGS += $(LDFLAGS)
 
 CORE_OBJS = loki_update.o prefpath.o url_paths.o meta_url.o \
             load_products.o load_patchset.o patchset.o urlset.o \
