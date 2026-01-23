@@ -1,4 +1,6 @@
-Current:
+1.0.14:
+Sébastien Noel - Fri Jan 23 09:36:35 CET 2026
+ * Use curl for downloads
 Ludwig Nussel - Sat Feb  7 21:44:57 PST 2004
  * Various bugfixes:
    - allow regular unix installation outside ./
