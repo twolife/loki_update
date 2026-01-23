@@ -265,6 +265,7 @@ static int _curl_url(const char *url, char *file, int maxpath,
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_ALL);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "loki_update " VERSION);
 
         // Get headers & total size
         curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
