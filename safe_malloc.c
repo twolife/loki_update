@@ -32,7 +32,7 @@ void *safe_malloc(size_t size)
 
     mem = malloc(size);
     if ( ! mem ) {
-        log(LOG_ERROR, "Out of memory, allocating %d bytes\n", size);
+        lokilog(LOG_ERROR, "Out of memory, allocating %d bytes\n", size);
         abort();
     }
     return(mem);
@@ -42,7 +42,7 @@ void *safe_realloc(void *mem, size_t size)
 {
     mem = realloc(mem, size);
     if ( ! mem ) {
-        log(LOG_ERROR, "Out of memory, allocating %d bytes\n", size);
+        lokilog(LOG_ERROR, "Out of memory, allocating %d bytes\n", size);
         abort();
     }
     return(mem);

@@ -264,7 +264,7 @@ void save_preferred_url(urlset *urlset)
                             urlset->preferred_site : "");
         fclose(fp);
     } else {
-        log(LOG_WARNING, _("Unable to write to %s\n"), mirror_file);
+        lokilog(LOG_WARNING, _("Unable to write to %s\n"), mirror_file);
     }
 }
 

@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
     load_product_list(product);
     if ( product_path ) {
         if ( ! product ) {
-            log(LOG_ERROR, _("Install path set, but no product specified\n"));
+            lokilog(LOG_ERROR, _("Install path set, but no product specified\n"));
             return(1);
         }
         set_product_root(product, product_path);
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
             return(3);
         }
     } else {
-        log(LOG_ERROR, _("No user interface modules available\n"));
+        lokilog(LOG_ERROR, _("No user interface modules available\n"));
         return(2);
     }
 
@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
 
         if ( auto_update ) {
             if ( product && ! is_valid_product(product) ) {
-                log(LOG_ERROR,
+                lokilog(LOG_ERROR,
                     _("%s not found, are you the one who installed it?\n"),
                     product);
                 return(1);

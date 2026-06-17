@@ -36,7 +36,7 @@ static int download_progress(int status_level, const char *status,
                              float rate, void *udata)
 {
     if ( status ) {
-        log(status_level, "%s\n", status);
+        lokilog(status_level, "%s\n", status);
     }
     return(0);
 }
@@ -62,7 +62,7 @@ void load_meta_url(const char *meta_url)
 
         while ( text_parsefield(file, key, sizeof(key), val, sizeof(val)) ) {
             compose_url(meta_url, val, product_url, sizeof(product_url));
-            log(LOG_DEBUG,
+            lokilog(LOG_DEBUG,
                 _("Setting product url for '%s' to: %s\n"), key, product_url);
             set_product_url(key, product_url);
         }

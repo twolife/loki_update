@@ -36,7 +36,7 @@ int get_logging(void)
     return(log_level);
 }
 
-void log(int level, const char *fmt, ...)
+void lokilog(int level, const char *fmt, ...)
 {
     if ( level >= log_level ) {
         va_list ap;

@@ -95,16 +95,16 @@ static int check_and_add_patch(patchset *patchset)
     status = 0;
     for ( i=0; i<sizeof(parse_table)/sizeof(parse_table[0]); ++i ) {
         if ( ! *parse_table[i].variable && ! parse_table[i].optional ) {
-            log(LOG_ERROR, "Missing in parse: %s\n", parse_table[i].prefix);
+            lokilog(LOG_ERROR, "Missing in parse: %s\n", parse_table[i].prefix);
             status = -1;
         }
     }
     if ( status != 0 ) {
-        log(LOG_ERROR, "Parsed so far in this update for %s:\n",
+        lokilog(LOG_ERROR, "Parsed so far in this update for %s:\n",
             patchset->product_name);
         for ( i=0; i<sizeof(parse_table)/sizeof(parse_table[0]); ++i ) {
             if ( *parse_table[i].variable ) {
-                log(LOG_ERROR, "%s: %s\n",
+                lokilog(LOG_ERROR, "%s: %s\n",
                     parse_table[i].prefix, *parse_table[i].variable);
             }
         }

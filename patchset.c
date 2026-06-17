@@ -158,7 +158,7 @@ static version_node *get_version_node(version_node *root,
     }
     if ( ! root ) {
         /* This is a new component add-on, add it as a root node */
-        log(LOG_DEBUG, "Adding new component root %s\n", description);
+        lokilog(LOG_DEBUG, "Adding new component root %s\n", description);
         root = main_root;
         node = create_version_node(NULL, component, version);
         node->sibling = root->sibling;
@@ -176,8 +176,8 @@ static version_node *get_version_node(version_node *root,
                discard it.  It will get picked up again if the user runs
                the updater again after installing the real component root.
             */
-            log(LOG_DEBUG, "Removing previously invalid component root\n");
-            log(LOG_DEBUG, "(addon patches should be listed after installs)\n");
+            lokilog(LOG_DEBUG, "Removing previously invalid component root\n");
+            lokilog(LOG_DEBUG, "(addon patches should be listed after installs)\n");
             parent = main_root;
             for ( node = parent->sibling; node != root; node = node->sibling ) {
                 parent = node;
@@ -185,7 +185,7 @@ static version_node *get_version_node(version_node *root,
             parent->sibling = root->sibling;
             root->sibling = NULL;
             free_version_node(root);
-            log(LOG_DEBUG, "Adding %s as new component root\n", description);
+            lokilog(LOG_DEBUG, "Adding %s as new component root\n", description);
             root = main_root;
             node = create_version_node(NULL, component, version);
             node->sibling = root->sibling;
@@ -195,12 +195,12 @@ static version_node *get_version_node(version_node *root,
     }
 
     /* Now see if this version node is already available */
-    log(LOG_DEBUG, "Looking for %s\n", description);
+    lokilog(LOG_DEBUG, "Looking for %s\n", description);
     parent = root;
     for ( node = root; node; node = node->child ) {
         /* If this is the exact node we're looking for.. */
         if ( strcasecmp(node->version, version) == 0 ) {
-            log(LOG_DEBUG, "Found correct node on trunk, returning it\n");
+            lokilog(LOG_DEBUG, "Found correct node on trunk, returning it\n");
             break;
         }
 
@@ -215,9 +215,9 @@ static version_node *get_version_node(version_node *root,
             branch = node;
             while ( node ) {
                 /* If this is the exact node we're looking for.. */
-                log(LOG_DEBUG, "Checking %s and %s\n", node->version, version);
+                lokilog(LOG_DEBUG, "Checking %s and %s\n", node->version, version);
                 if ( strcasecmp(version, node->version) <= 0 ) {
-                    log(LOG_DEBUG,
+                    lokilog(LOG_DEBUG,
                         "Alphabetical match (less than or equal to)\n");
                     break;
                 }
@@ -227,19 +227,19 @@ static version_node *get_version_node(version_node *root,
             if ( node ) {
                 /* We might have found the correct node */
                 if ( strcasecmp(node->version, version) == 0 ) {
-                    log(LOG_DEBUG,
+                    lokilog(LOG_DEBUG,
                         "Found correct node on branch, returning it\n");
                 } else {
                     /* Need to insert ourselves here */
                     if ( node == branch ) {
-                        log(LOG_DEBUG, "Inserting ourselves as trunk node\n");
+                        lokilog(LOG_DEBUG, "Inserting ourselves as trunk node\n");
                         node = create_version_node(root, component, version);
                         node->sibling = branch;
                         node->child = branch->child;
                         branch->child = NULL;
                         parent->child = node;
                     } else {
-                        log(LOG_DEBUG, "Inserting ourselves as sibling node\n");
+                        lokilog(LOG_DEBUG, "Inserting ourselves as sibling node\n");
                         node = create_version_node(root, component, version);
                         node->sibling = branch->sibling;
                         branch->sibling = node;
@@ -247,7 +247,7 @@ static version_node *get_version_node(version_node *root,
                 }
             } else {
                 /* We need to add ourselves as a new sibling */
-                log(LOG_DEBUG, "Creating new leaf sibling node\n");
+                lokilog(LOG_DEBUG, "Creating new leaf sibling node\n");
                 node = create_version_node(root, component, version);
                 branch->sibling = node;
             }
@@ -260,7 +260,7 @@ static version_node *get_version_node(version_node *root,
 
     /* If we need to insert ourselves here, do so */
     if ( ! node ) {
-        log(LOG_DEBUG, "Creating new trunk node\n");
+        lokilog(LOG_DEBUG, "Creating new trunk node\n");
         node = create_version_node(root, component, version);
         node->child = parent->child;
         parent->child = node;
@@ -465,16 +465,16 @@ int add_patch(const char *product,
         component = get_default_component(patchset->product_name);
         snprintf(description, sizeof(description), "Patch %s", version);
     }
-    log(LOG_DEBUG, "Potential patch:\n");
-    log(LOG_DEBUG, "\tProduct: %s\n", product);
-    log(LOG_DEBUG, "\tComponent: %s\n", component);
-    log(LOG_DEBUG, "\tVersion: %s\n", version);
-    log(LOG_DEBUG, "\tArchitecture: %s\n", arch ? arch : "any");
-    log(LOG_DEBUG, "\tLibc: %s\n", libc ? libc : "any");
-    log(LOG_DEBUG, "\tApplies: %s\n", applies);
+    lokilog(LOG_DEBUG, "Potential patch:\n");
+    lokilog(LOG_DEBUG, "\tProduct: %s\n", product);
+    lokilog(LOG_DEBUG, "\tComponent: %s\n", component);
+    lokilog(LOG_DEBUG, "\tVersion: %s\n", version);
+    lokilog(LOG_DEBUG, "\tArchitecture: %s\n", arch ? arch : "any");
+    lokilog(LOG_DEBUG, "\tLibc: %s\n", libc ? libc : "any");
+    lokilog(LOG_DEBUG, "\tApplies: %s\n", applies);
 
     if ( strcasecmp(product, patchset->product_name) != 0 ) {
-        log(LOG_DEBUG, "Patch for different product, dropping\n");
+        lokilog(LOG_DEBUG, "Patch for different product, dropping\n");
         return(0);
     }
 
@@ -492,7 +492,7 @@ int add_patch(const char *product,
             }
         }
         if ( ! matched_arch ) {
-            log(LOG_DEBUG, _("Patch for different architecture, dropping\n"));
+            lokilog(LOG_DEBUG, _("Patch for different architecture, dropping\n"));
             return(0);
         }
     }
@@ -511,7 +511,7 @@ int add_patch(const char *product,
             }
         }
         if ( ! matched_libc ) {
-            log(LOG_DEBUG, _("Patch for different version of libc, dropping\n"));
+            lokilog(LOG_DEBUG, _("Patch for different version of libc, dropping\n"));
             return(0);
         }
     }
@@ -519,7 +519,7 @@ int add_patch(const char *product,
     /* Create (or retrieve) the version_node */
     node = get_version_node(patchset->root, component, version, description);
     if ( ! node ) {
-        log(LOG_DEBUG, _("Update obsolete by installed version, dropping\n"));
+        lokilog(LOG_DEBUG, _("Update obsolete by installed version, dropping\n"));
         return(0);
     }
     /* Add any user-note for this node */
@@ -578,7 +578,7 @@ int add_patch(const char *product,
             if (legal_version_combination(node->version, patch->node->version)){
                 add_adjacent_node(node, patch);
             } else {
-                log(LOG_DEBUG,
+                lokilog(LOG_DEBUG,
                     _("Version combination %s and %s isn't legal, dropping\n"),
                     node->description, patch->node->description);
             }
@@ -734,7 +734,7 @@ static void trim_unconnected_nodes(version_node *trunk_prev,
             } else {
                 prev->sibling = next;
                 node->sibling = NULL;
-                log(LOG_DEBUG, "%s has no patch path, trimming\n", 
+                lokilog(LOG_DEBUG, "%s has no patch path, trimming\n",
                     node->version);
                 free_version_node(node);
             }
@@ -754,7 +754,7 @@ static void trim_unconnected_nodes(version_node *trunk_prev,
                 trunk_prev->child = node->child;
             }
             node->child = NULL;
-            log(LOG_DEBUG, "%s has no patch path, trimming\n", 
+            lokilog(LOG_DEBUG, "%s has no patch path, trimming\n",
                 node->version);
             free_version_node(node);
         }
@@ -769,7 +769,7 @@ static void trim_unconnected_roots(version_node *root)
     for ( node = root->sibling; node; ) {
         if ( !node->invisible && !node->shortest_path ) {
             /* It doesn't apply to the installed version, drop it */
-            log(LOG_DEBUG, 
+            lokilog(LOG_DEBUG,
                 "Add-on %s doesn't apply to installed product, trimming\n",
                 node->description);
             prev->sibling = node->sibling;
@@ -791,7 +791,7 @@ static void trim_unused_patches(patchset *patchset)
     for ( patch = patchset->patches; patch; ) {
         /* If this patch isn't used in an upgrade path, we can discard it */
         if ( ! patch->refcount ) {
-            log(LOG_DEBUG, "%s not used in upgrade path, trimming\n",
+            lokilog(LOG_DEBUG, "%s not used in upgrade path, trimming\n",
                 patch->description);
             freeable = patch;
             patch = patch->next;
@@ -816,7 +816,7 @@ void calculate_paths(patchset *patchset)
     int depth;
     int num_nodes;
 
-    log(LOG_DEBUG, "Calculating patch paths for %s %s\n",
+    lokilog(LOG_DEBUG, "Calculating patch paths for %s %s\n",
         get_product_description(patchset->product_name),
         get_product_version(patchset->product_name));
 

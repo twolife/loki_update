@@ -52,7 +52,7 @@ void update_message(int level, const char *message,
             free(text);
         }
     } else {
-        log(level, "%s\n", message);
+        lokilog(level, "%s\n", message);
     }
 }
 

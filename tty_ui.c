@@ -61,7 +61,7 @@ static void remove_update(void)
 
 static void set_status_message(const char *message)
 {
-    log(LOG_STATUS, "%s\n", message);
+    lokilog(LOG_STATUS, "%s\n", message);
 }
 
 static void reset_selected_update(void)
@@ -133,7 +133,7 @@ static void enable_gpg_details(const char *url, char *sig)
         fingerprint += 4;
     }
     strcat(text, "\n");
-    log(LOG_NORMAL, "%s", text);
+    lokilog(LOG_NORMAL, "%s", text);
 }
 
 static gpg_result do_gpg_verify(const char *file, char *sig, int maxsig)
@@ -187,7 +187,7 @@ static void update_product(const char *product_name)
     /* Create a patchset for this product */
     patchset = create_patchset(product_name);
     if ( ! patchset ) {
-        log(LOG_WARNING, "Unable to open product '%s'\n", product_name);
+        lokilog(LOG_WARNING, "Unable to open product '%s'\n", product_name);
         return;
     }
 
@@ -417,13 +417,13 @@ static int ttyui_perform_updates(const char *product)
         if ( is_valid_product(product) ) {
             update_product(product);
         } else {
-            log(LOG_ERROR,
+            lokilog(LOG_ERROR,
                 _("%s not found, are you the one who installed it?\n"),
                 product);
             update_status = -1;
         }
     } else {
-        log(LOG_ERROR, _("Interactive updates require X11\n"));
+        lokilog(LOG_ERROR, _("Interactive updates require X11\n"));
         update_status = -1;
     }
     return update_status;

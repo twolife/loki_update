@@ -159,7 +159,7 @@ static int wget_url(const char *url, char *file, int maxpath,
                 percentage = (float)atoi(spot);
             } else {
                 /* Log the download output */
-                log(LOG_DEBUG, "%s\n", line);
+                lokilog(LOG_DEBUG, "%s\n", line);
             }
             len = 0;
         } else {

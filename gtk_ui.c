@@ -551,7 +551,7 @@ static void add_details_text(int level, const char *text)
                             text, strlen(text));
         }
     }
-    log(level, "%s", text);
+    lokilog(level, "%s", text);
 }
 
 static void open_save_details(void)
@@ -1726,7 +1726,7 @@ void choose_update_slot( GtkWidget* w, gpointer data )
         /* Create a patchset for this product */
         patchset = create_patchset(product_name);
         if ( ! patchset ) {
-            log(LOG_WARNING, "Unable to open product '%s'\n", product_name);
+            lokilog(LOG_WARNING, "Unable to open product '%s'\n", product_name);
         }
 
         /* Reset the panel */
@@ -1994,7 +1994,7 @@ _("No products found.\nAre you the one that installed the software?"));
             gtk_widget_show(label);
         }
     } else {
-        log(LOG_ERROR, _("No product_vbox in glade file!\n"));
+        lokilog(LOG_ERROR, _("No product_vbox in glade file!\n"));
         return(-1);
     }
     widget = glade_xml_get_widget(update_glade, "product_continue_button");
