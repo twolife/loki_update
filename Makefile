@@ -11,6 +11,7 @@ os := $(shell uname -s)
 arch := $(shell sh print_arch)
 libc := $(shell sh print_libc)
 
+GTK ?= 1
 SETUPDB = ../loki_setupdb
 CFLAGS ?= -g -O2 -Wall
 ifeq ($(arch),alpha)
@@ -21,7 +22,11 @@ CFLAGS += -DMD5SUM=\"$(MD5SUM)\"
 endif
 CFLAGS += -I$(SETUPDB) -DVERSION=\"$(VERSION)\" -DDYNAMIC_UI
 CFLAGS += -DUI_LIBDIR=\"$(UI_LIBDIR)\" -DDATADIR=\"$(DATADIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\"
+ifeq ($(GTK),1)
 CFLAGS += $(shell pkgconf gtk+ --cflags) $(shell pkgconf libglade --cflags)
+else
+CFLAGS += $(shell pkgconf gtk4 --cflags)
+endif
 CFLAGS += $(shell xml2-config --cflags)
 LFLAGS = -rdynamic
 LFLAGS += -Wl,-Bstatic
@@ -34,10 +39,16 @@ LFLAGS += $(LDFLAGS)
 
 TTY_LFLAGS = $(LDFLAGS)
 
+ifeq ($(GTK),1)
+GTK_SRC = gtk_ui.c
 GTK_SH_LFLAGS = -Wl,-Bstatic
 GTK_SH_LFLAGS += -lglade
 GTK_SH_LFLAGS += -Wl,-Bdynamic
 GTK_SH_LFLAGS += $(shell pkgconf gtk+ --libs)
+else
+GTK_SRC = gtk4_ui.c
+GTK_SH_LFLAGS = $(shell pkgconf gtk4 --libs)
+endif
 GTK_SH_LFLAGS += $(LDFLAGS)
 
 CORE_OBJS = loki_update.o prefpath.o url_paths.o meta_url.o \
@@ -51,7 +62,7 @@ CORE_SRCS = $(CORE_OBJS:.o=.c)
 
 all: $(TARGET) tty_ui.so gtk_sh_ui.so
 
-gtk_sh_ui.o: gtk_ui.c
+gtk_sh_ui.o: $(GTK_SRC)
 	$(CC) -c -o $@ $(CFLAGS) -fPIC $^
 
 gtk_sh_ui.so: gtk_sh_ui.o
